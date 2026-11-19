@@ -22,6 +22,12 @@
   .tabs button.on{background:var(--green);color:#fff;border-color:var(--green)}
   .card{background:var(--card);border:1px solid var(--line);border-radius:14px;overflow:hidden;margin-bottom:16px}
   .card img{width:100%;display:block;background:#fff}
+  .pics{display:flex;flex-direction:column}
+  .pic{position:relative;cursor:pointer;border-bottom:1px solid var(--line)}
+  .pic:last-child{border-bottom:0}
+  .pic .cap{position:absolute;left:10px;top:8px;background:#000b;color:#fff;font-size:12px;font-weight:700;padding:2px 10px;border-radius:99px}
+  .pic.on{outline:3px solid var(--green);outline-offset:-3px}
+  .pic.on .cap{background:var(--green)}
   .card .body{padding:14px 16px 16px}
   .card h2{margin:0 0 2px;font-size:17px}
   .price{font-size:14px;margin-bottom:8px;color:var(--mute)}
@@ -204,6 +210,7 @@ const IMG = {
 /* ---------- 注文画面 ---------- */
 function chipGroup(options, onPick) {
   const wrap = el('div', { class: 'chips' });
+  const byLabel = {};
   let value = '';
   options.forEach((o) => {
     const label = typeof o === 'string' ? o : o.name;
@@ -214,9 +221,10 @@ function chipGroup(options, onPick) {
       chip.classList.add('on');
       onPick && onPick(label);
     };
+    byLabel[label] = chip;
     wrap.append(chip);
   });
-  return { node: wrap, get: () => value };
+  return { node: wrap, get: () => value, set: (l) => { if (byLabel[l]) byLabel[l].click(); } };
 }
 
 function sizeOptions(it) {
@@ -234,8 +242,20 @@ function sizeOptions(it) {
 function itemCard(it) {
   const imgs = IMG[it.id] || { def: '', logos: {}, chart: '' };
   const card = el('div', { class: 'card' });
-  const pic = el('img', { src: imgs.def, alt: it.name, loading: 'lazy' });
-  card.append(pic);
+  // ロゴの大・小がある商品は、2枚とも最初から並べて見せる（タップで選べる）
+  const figs = {};
+  const fields = {};
+  if (it.logos && it.logos.every((l) => imgs.logos[l])) {
+    card.append(el('div', { class: 'pics' }, ...it.logos.map((l) => {
+      const fig = el('div', { class: 'pic', onclick: () => fields.logo && fields.logo.set(l) },
+        el('img', { src: imgs.logos[l], alt: it.name + ' ' + l, loading: 'lazy' }),
+        el('div', { class: 'cap', text: (l.charAt(0) === '大' ? 'ロゴ 大' : 'ロゴ 小') + '（タップで選択）' }));
+      figs[l] = fig;
+      return fig;
+    })));
+  } else {
+    card.append(el('img', { src: imgs.def, alt: it.name, loading: 'lazy' }));
+  }
   const body = el('div', { class: 'body' });
   body.append(
     el('h2', { text: it.name }),
@@ -246,7 +266,6 @@ function itemCard(it) {
   }
   if (it.extraNote) body.append(el('div', { class: 'hint', style: 'margin:-4px 0 8px', text: '※ ' + it.extraNote }));
 
-  const fields = {};
   if (it.colors) {
     body.append(el('label', { text: '色' }));
     fields.color = chipGroup(it.colors);
@@ -254,7 +273,7 @@ function itemCard(it) {
   }
   if (it.logos) {
     body.append(el('label', { text: 'ロゴの大きさ' }));
-    fields.logo = chipGroup(it.logos, (label) => { if (imgs.logos[label]) pic.src = imgs.logos[label]; });
+    fields.logo = chipGroup(it.logos, (label) => { Object.keys(figs).forEach((k) => figs[k].classList.toggle('on', k === label)); });
     body.append(fields.logo.node);
   }
 
@@ -411,7 +430,7 @@ function renderConfirm() {
       };
       chips.append(chip);
     });
-    kids.push(el('label', {}, 'お渡し会場（種目） ', el('span', { class: 'hint', text: '受け取りに行く練習会場を1つ選んでください' })), chips);
+    kids.push(el('label', {}, 'お渡しの練習日 ', el('span', { class: 'hint', text: '受け取りに行く練習日を1つ選んでください' })), chips);
     if (T.handoff) kids.push(el('div', { class: 'hint', style: 'margin-top:6px', text: T.handoff }));
   }
 
@@ -436,7 +455,7 @@ function renderConfirm() {
     err.textContent = '';
     const name = nameInput.value.trim().replace(/[ 　]+/g, ' ');
     if (!KANA_RE.test(name)) return (err.textContent = 'お名前はカタカナのフルネームで入力してください（姓と名の間にスペース）');
-    if (events.length && !venue) return (err.textContent = 'お渡し会場（種目）を選んでください');
+    if (events.length && !venue) return (err.textContent = 'お渡しの練習日を選んでください');
     if (!payCheck.checked) return (err.textContent = 'お支払いについての同意にチェックしてください');
     if (!canCheck.checked) return (err.textContent = 'キャンセルポリシーの同意にチェックしてください');
     customerName = name;
@@ -452,7 +471,7 @@ function openFinal(name, venue, tt) {
   const modal = el('div', { class: 'modal' }, el('div', { class: 'box' },
     el('h3', { text: 'この内容で注文を確定しますか？' }),
     el('div', { text: 'お名前：' + name }),
-    venue ? el('div', { text: 'お渡し会場：' + venue }) : null,
+    venue ? el('div', { text: 'お渡し練習日：' + venue }) : null,
     el('div', { text: '合計：' + yen(tt.t) }),
     el('div', { class: 'hint', style: 'margin-top:8px', text: '確定後のキャンセルは、受付期間内なら「注文書・キャンセル」から行えます。' }),
     msg,
@@ -525,7 +544,7 @@ function renderCheck() {
       const rows = el('div', { class: 'sumrows' },
         kv('お名前', r.name),
         kv('受付日時', r.placedAt),
-        r.venue ? kv('お渡し会場', r.venue) : null,
+        r.venue ? kv('お渡し練習日', r.venue) : null,
         kv('状態', active.length ? '受付済み' : 'キャンセル済み')
       );
       const items = r.lines.map((l) => el('div', { class: 'cartline', style: l.state === 'キャンセル' ? 'text-decoration:line-through;color:var(--mute)' : '' },

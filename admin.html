@@ -79,7 +79,7 @@
   <div id="app" class="hidden">
     <div class="tabs">
       <button id="tOrders" class="on">注文</button>
-      <button id="tVenues">会場別</button>
+      <button id="tVenues">練習日別</button>
       <button id="tTotal">発注集計</button>
     </div>
     <div class="stats" id="stats"></div>
@@ -213,7 +213,7 @@ function renderOrders(orders) {
     c.onclick = () => { F.status = k; renderOrders(orders); };
     return c;
   }));
-  const vChips = VENUES.length ? el('div', { class: 'chips' }, ...[['', '全会場'], ...VENUES.map((x) => [x, x])].map(([k, t]) => {
+  const vChips = VENUES.length ? el('div', { class: 'chips' }, ...[['', 'すべての練習日'], ...VENUES.map((x) => [x, x])].map(([k, t]) => {
     const c = el('div', { class: 'chip' + (F.venue === k ? ' on' : ''), text: t });
     c.onclick = () => { F.venue = k; renderOrders(orders); };
     return c;
@@ -324,7 +324,7 @@ function renderVenues(orders) {
     const unpaid = live.filter((o) => !o.paid).reduce((a, o) => a + o.total, 0);
     const rows = [].concat(...target.map((o) => o.rows.filter((r) => r.state !== 'キャンセル')));
     return el('div', { class: 'card vcard' },
-      el('h3', { text: name || '（会場未選択）' }),
+      el('h3', { text: name || '（練習日が未選択）' }),
       el('div', { class: 'meta', text: live.length + '件　未渡し ' + live.filter((o) => !o.handed).length + '件　未回収 ' + yen(unpaid) }),
       breakdownNode(breakdown(rows)));
   });
