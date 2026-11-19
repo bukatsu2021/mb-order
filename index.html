@@ -1,0 +1,569 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>注文フォーム｜MB SPORTS 一斉まとめ注文</title>
+<style>
+  :root{
+    --green:#1b7a3e; --navy:#14213d; --yellow:#ffd200; --red:#e02424; --ink:#1c1f1d; --mute:#6b726d;
+    --bg:#f4f6f3; --card:#fff; --line:#dfe5df; --err:#c0262d;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans","Noto Sans JP",sans-serif;background:var(--bg);color:var(--ink);line-height:1.6;-webkit-text-size-adjust:100%}
+  header{background:linear-gradient(135deg,#000,var(--navy) 55%,#0f4d2a);color:#fff;padding:22px 20px 22px;text-align:center}
+  header .logo{display:block;width:120px;margin:0 auto 6px;mix-blend-mode:screen}
+  header .tag{display:inline-block;background:var(--yellow);color:var(--navy);font-weight:800;font-size:12px;padding:2px 12px;border-radius:99px;margin-bottom:8px}
+  header h1{margin:0;font-size:21px;line-height:1.35}
+  header p{margin:8px 0 0;font-size:13px;opacity:.92}
+  main{max-width:560px;margin:0 auto;padding:16px 16px 120px}
+  .tabs{display:flex;gap:8px;margin:0 0 16px}
+  .tabs button{flex:1;padding:10px;border:1px solid var(--line);background:#fff;border-radius:10px;font-size:14px;font-weight:600;color:var(--mute)}
+  .tabs button.on{background:var(--green);color:#fff;border-color:var(--green)}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:14px;overflow:hidden;margin-bottom:16px}
+  .card img{width:100%;display:block;background:#fff}
+  .card .body{padding:14px 16px 16px}
+  .card h2{margin:0 0 2px;font-size:17px}
+  .price{font-size:14px;margin-bottom:8px;color:var(--mute)}
+  .price s{color:#9aa09b}
+  .price b{color:var(--red);font-size:20px;margin-left:4px}
+  label{display:block;font-size:13px;font-weight:600;margin:12px 0 4px}
+  .hint{font-weight:400;color:var(--mute);font-size:12px}
+  input[type=text],select{width:100%;padding:12px;border:1px solid var(--line);border-radius:10px;font-size:16px;background:#fff;color:var(--ink)}
+  .row{display:flex;gap:8px}.row>*{flex:1}
+  .chips{display:flex;flex-wrap:wrap;gap:8px}
+  .chip{display:flex;align-items:center;gap:6px;padding:8px 12px;border:1.5px solid var(--line);border-radius:99px;font-size:14px;background:#fff;cursor:pointer;user-select:none}
+  .chip.on{border-color:var(--green);background:#e8f4ec;font-weight:700}
+  .dot{width:14px;height:14px;border-radius:50%;border:1px solid #0003}
+  .btn{display:block;width:100%;padding:14px;border:0;border-radius:12px;font-size:16px;font-weight:700;background:var(--green);color:#fff;margin-top:14px}
+  .btn.sub{background:#fff;color:var(--green);border:1.5px solid var(--green)}
+  .btn.danger{background:#fff;color:var(--err);border:1.5px solid var(--err)}
+  .btn:disabled{opacity:.5}
+  .err{color:var(--err);font-size:13px;margin-top:8px;min-height:1em}
+  .cartline{display:flex;justify-content:space-between;gap:10px;padding:10px 0;border-bottom:1px solid var(--line);font-size:14px}
+  .cartline:last-child{border:0}
+  .cartline .x{color:var(--err);background:none;border:0;font-size:13px;white-space:nowrap}
+  .bar{position:fixed;left:0;right:0;bottom:0;background:#fff;border-top:1px solid var(--line);padding:10px 16px calc(10px + env(safe-area-inset-bottom));display:flex;align-items:center;gap:12px;z-index:5}
+  .bar .sum{flex:1;font-size:13px;color:var(--mute)}
+  .bar .sum b{display:block;font-size:16px;color:var(--ink)}
+  .bar button{padding:12px 22px;border:0;border-radius:12px;background:var(--red);color:#fff;font-weight:700;font-size:15px}
+  .bar .sum{cursor:pointer}
+  .bar .sum span::after{content:" ▲";font-size:11px}
+  .bar.open .sum span::after{content:" ▼"}
+  .sheet{position:fixed;left:0;right:0;bottom:var(--barh,70px);background:#fff;border-top:1px solid var(--line);box-shadow:0 -8px 24px #0002;max-height:55vh;overflow:auto;padding:12px 16px;z-index:4}
+  .sheet h3{margin:0 0 4px;font-size:15px}
+  .sheet .inner{max-width:560px;margin:0 auto}
+  .sheet .empty{color:var(--mute);font-size:14px;padding:10px 0}
+  .agree{display:flex;gap:10px;align-items:flex-start;font-weight:700;font-size:14px;margin:10px 0 0}
+  .agree input{width:22px;height:22px;flex:none;margin:0}
+  .policy{background:#f5f7f4;border:1px solid var(--line);border-radius:10px;padding:10px 12px;font-size:13px;white-space:pre-line;margin-top:6px}
+  .sumrows{margin-top:10px;font-size:14px}
+  .sumrows div{display:flex;justify-content:space-between;gap:10px;padding:2px 0}
+  .sumrows div span:last-child{white-space:nowrap;text-align:right}
+  .sumrows .grand{font-size:17px;font-weight:800;border-top:1px solid var(--line);margin-top:4px;padding-top:6px}
+  .disc{color:var(--red)}
+  .stat-badge{display:inline-block;background:#fff0f0;color:var(--red);font-weight:700;font-size:12px;padding:3px 10px;border-radius:99px;margin:0 0 10px}
+  .modal .box.wide{max-width:760px;max-height:92vh;overflow:auto}
+  .modal img.chart{width:100%;display:block;border:1px solid var(--line);border-radius:8px;margin-top:8px}
+  .lnk{color:var(--green);font-weight:700;text-decoration:underline;cursor:pointer}
+  .no{font-size:24px;font-weight:800;letter-spacing:.08em;color:var(--green);margin:4px 0 8px}
+  .modal{position:fixed;inset:0;background:#000a;display:flex;align-items:center;justify-content:center;padding:20px;z-index:20}
+  .modal .box{background:#fff;border-radius:16px;padding:20px;width:100%;max-width:420px}
+  .modal h3{margin:0 0 8px;font-size:18px}
+  .modal .btns{display:flex;gap:10px;margin-top:16px}
+  .modal .btns .btn{margin-top:0}
+  .notice{background:#fff8e1;border:1px solid #f0dd9a;border-radius:10px;padding:10px 12px;font-size:13px;margin-bottom:12px}
+  .notice.set{background:#fff0f0;border-color:#f3c3c3;font-weight:700}
+  .done{text-align:center;padding:30px 10px}
+  .done .no{font-size:30px;font-weight:800;letter-spacing:.05em;color:var(--green);margin:6px 0}
+  .hidden{display:none}
+  .closed{text-align:center;padding:40px 10px;color:var(--mute)}
+</style>
+</head>
+<body>
+<header>
+  <img class="logo" src="mb_logo.webp" alt="MB">
+  <div class="tag">会員限定 年末セール</div>
+  <h1>MB SPORTS スポーツウェア<br>一斉まとめ注文フォーム</h1>
+  <p>受付は <b id="deadline">11/27（金）23:59</b> まで</p>
+</header>
+
+<main>
+  <div class="tabs">
+    <button id="tabOrder" class="on">注文する</button>
+    <button id="tabCheck">注文書・キャンセル</button>
+  </div>
+  <div id="loading" class="closed">読み込み中…</div>
+  <div id="viewOrder" class="hidden"></div>
+  <div id="viewCheck" class="hidden"></div>
+  <div id="viewDone" class="hidden"></div>
+</main>
+
+<div class="sheet hidden" id="sheet"><div class="inner"><h3>🛒 カートの中身</h3><div id="sheetList"></div></div></div>
+<div class="bar hidden" id="bar">
+  <div class="sum"><span id="barCount">0点</span><b id="barTotal"></b></div>
+  <button id="barBtn">注文内容を確認</button>
+</div>
+
+<script>
+/* ★ GASをウェブアプリとしてデプロイしたURLをここに貼る */
+const GAS_URL = 'ここにGASのウェブアプリURLを貼る';
+
+const $ = (id) => document.getElementById(id);
+let CONFIG = null;
+let cart = [];
+let customerName = '';
+let confirming = false;
+let ITEM_STATS = {};
+
+const isClosedNow = () => !!(CONFIG && CONFIG.deadline && new Date() > new Date(CONFIG.deadline));
+const yen = (n) => '¥' + Number(n).toLocaleString('ja-JP');
+const itemOf = (id) => CONFIG.items.find((i) => i.id === id);
+const unitPrice = (it, size) => it.price + ((it.sizeExtra && it.sizeExtra[size]) || 0);
+
+function el(tag, attrs, ...kids) {
+  const e = document.createElement(tag);
+  for (const k in (attrs || {})) {
+    if (k === 'class') e.className = attrs[k];
+    else if (k === 'text') e.textContent = attrs[k];
+    else if (k.startsWith('on')) e.addEventListener(k.slice(2), attrs[k]);
+    else e.setAttribute(k, attrs[k]);
+  }
+  kids.flat().forEach((c) => c != null && e.append(c));
+  return e;
+}
+
+async function api(body) {
+  const res = await fetch(GAS_URL, {
+    method: 'POST',
+    headers: { 'Content-Type': 'text/plain;charset=utf-8' }, // プリフライト回避
+    body: JSON.stringify(body)
+  });
+  return res.json();
+}
+
+/* ---------- 起動 ---------- */
+async function init() {
+  if (GAS_URL.indexOf('https://') !== 0) {
+    $('loading').textContent = '準備中です（GASのURLが未設定です）。';
+    return;
+  }
+  try {
+    const res = await fetch(GAS_URL);
+    const data = await res.json();
+    CONFIG = data.config;
+    ITEM_STATS = data.itemStats || {};
+    $('deadline').textContent = CONFIG.deadlineText;
+    $('loading').classList.add('hidden');
+    if (data.closed) showClosed(); else renderOrder();
+    show('order');
+    renderCheck();
+  } catch (e) {
+    $('loading').textContent = '読み込みに失敗しました。通信状況を確認して、ページを再読み込みしてください。';
+  }
+}
+
+let closedShown = false;
+function showClosed() {
+  closedShown = true;
+  confirming = true;
+  cart = [];
+  setSheet(false);
+  $('bar').classList.add('hidden');
+  $('viewOrder').replaceChildren(el('div', { class: 'card' }, el('div', { class: 'body closed' },
+    el('h2', { text: 'ご注文の受付は終了しました' }),
+    el('p', { text: '受付期間は' + CONFIG.deadlineText + 'まででした。ご注文済みの方は、上の「注文書・キャンセル」から注文書を確認できます。ご不明点は運営までご連絡ください。' })
+  )));
+}
+
+function show(which) {
+  ['Order', 'Check', 'Done'].forEach((n) => $('view' + n).classList.add('hidden'));
+  $('view' + (which === 'order' ? 'Order' : which === 'check' ? 'Check' : 'Done')).classList.remove('hidden');
+  $('tabOrder').classList.toggle('on', which === 'order');
+  $('tabCheck').classList.toggle('on', which === 'check');
+  setSheet(false);
+  $('bar').classList.toggle('hidden', which !== 'order' || !cart.length || confirming);
+  window.scrollTo(0, 0);
+}
+$('tabOrder').onclick = () => {
+  // 注文を終えたあとに古い確認画面が残らないよう、商品選択に戻す
+  if (!closedShown && confirming && !cart.length) renderOrder();
+  show('order');
+};
+$('tabCheck').onclick = () => show('check');
+
+/* ---------- 画像 ---------- */
+const BIG = '大（ビッグロゴ）', SMALL = '小（ワンポイント）';
+const IMG = {
+  tee:    { def: 'tee_big.webp',    logos: { [BIG]: 'tee_big.webp',    [SMALL]: 'tee_small.webp' },    chart: 'size_tee.webp' },
+  long:   { def: 'long_big.webp',   logos: { [BIG]: 'long_big.webp',   [SMALL]: 'long_small.webp' },   chart: 'size_long.webp' },
+  parker: { def: 'parker_big.webp', logos: { [BIG]: 'parker_big.webp', [SMALL]: 'parker_small.webp' }, chart: 'size_parker.webp' },
+  pants:  { def: 'pants.webp',      logos: {},                                                          chart: 'size_pants.webp' }
+};
+
+/* ---------- 注文画面 ---------- */
+function chipGroup(options, onPick) {
+  const wrap = el('div', { class: 'chips' });
+  let value = '';
+  options.forEach((o) => {
+    const label = typeof o === 'string' ? o : o.name;
+    const chip = el('div', { class: 'chip' }, o.hex ? el('span', { class: 'dot', style: 'background:' + o.hex }) : null, label);
+    chip.onclick = () => {
+      value = label;
+      wrap.querySelectorAll('.chip').forEach((c) => c.classList.remove('on'));
+      chip.classList.add('on');
+      onPick && onPick(label);
+    };
+    wrap.append(chip);
+  });
+  return { node: wrap, get: () => value };
+}
+
+function sizeOptions(it) {
+  const groups = CONFIG.sizeGroups || [];
+  const opt = (s) => {
+    const x = (it.sizeExtra && it.sizeExtra[s]) || 0;
+    return el('option', { value: s, text: x ? s + '（+' + x + '円）' : s });
+  };
+  return groups.map((g) => {
+    const ss = g.sizes.filter((s) => it.sizes.indexOf(s) >= 0);
+    return ss.length ? el('optgroup', { label: g.label }, ss.map(opt)) : null;
+  });
+}
+
+function itemCard(it) {
+  const imgs = IMG[it.id] || { def: '', logos: {}, chart: '' };
+  const card = el('div', { class: 'card' });
+  const pic = el('img', { src: imgs.def, alt: it.name, loading: 'lazy' });
+  card.append(pic);
+  const body = el('div', { class: 'body' });
+  body.append(
+    el('h2', { text: it.name }),
+    el('div', { class: 'price' }, el('s', { text: yen(it.normal) }), el('b', { text: yen(it.price) }), '（税込・会員価格）')
+  );
+  if (ITEM_STATS[it.id] != null) {
+    body.append(el('div', { class: 'stat-badge', text: '現在の注文：' + ITEM_STATS[it.id] + '枚' }));
+  }
+  if (it.extraNote) body.append(el('div', { class: 'hint', style: 'margin:-4px 0 8px', text: '※ ' + it.extraNote }));
+
+  const fields = {};
+  if (it.colors) {
+    body.append(el('label', { text: '色' }));
+    fields.color = chipGroup(it.colors);
+    body.append(fields.color.node);
+  }
+  if (it.logos) {
+    body.append(el('label', { text: 'ロゴの大きさ' }));
+    fields.logo = chipGroup(it.logos, (label) => { if (imgs.logos[label]) pic.src = imgs.logos[label]; });
+    body.append(fields.logo.node);
+  }
+
+  body.append(el('div', { class: 'row' },
+    el('div', {}, el('label', {}, 'サイズ ', el('a', { class: 'lnk', text: 'サイズ表', onclick: (e) => { e.preventDefault(); openSizeChart(it); } })), (fields.size = el('select', {}, el('option', { value: '', text: '選択' }), sizeOptions(it)))),
+    el('div', {}, el('label', { text: '数量' }), (fields.qty = el('select', {}, [1, 2, 3, 4, 5].map((n) => el('option', { value: n, text: n + '点' })))))
+  ));
+
+  const err = el('div', { class: 'err' });
+  body.append(err);
+  body.append(el('button', { class: 'btn sub', text: 'カートに追加', onclick: () => {
+    const line = { itemId: it.id, itemName: it.name, size: fields.size.value, qty: Number(fields.qty.value) };
+    if (fields.color) line.color = fields.color.get();
+    if (fields.logo) line.logo = fields.logo.get();
+    if (fields.color && !line.color) return (err.textContent = '色を選んでください');
+    if (fields.logo && !line.logo) return (err.textContent = 'ロゴの大きさを選んでください');
+    if (!line.size) return (err.textContent = 'サイズを選んでください');
+    err.textContent = '';
+    cart.push(line);
+    updateBar();
+    err.style.color = 'var(--green)';
+    err.textContent = '✓ カートに追加しました';
+    setTimeout(() => { err.textContent = ''; err.style.color = ''; }, 2000);
+  } }));
+  card.append(body);
+  return card;
+}
+
+function renderOrder() {
+  confirming = false;
+  const v = $('viewOrder');
+  const notes = (CONFIG.setDeals || []).map((d) => el('div', { class: 'notice set', text: d.note }));
+  v.replaceChildren(
+    el('div', { class: 'notice', text: '欲しい商品を選んで「カートに追加」→ 下の「注文内容を確認」で完了です。キャンセルは' + CONFIG.deadlineText + 'まで、このページの「注文書・キャンセル」からできます。' }),
+    ...notes,
+    el('div', { class: 'hint', style: 'margin:0 0 14px' }, 'サイズに迷ったら、各商品の「サイズ表」を見てください。練習会場に実物サンプルも持っていきます。'),
+    ...CONFIG.items.map(itemCard)
+  );
+}
+
+function lineLabel(l) {
+  const parts = [l.itemName, l.color, l.logo, 'サイズ ' + l.size, '×' + l.qty];
+  if (l.unit != null) parts.push(yen(l.unit * l.qty));
+  return parts.filter(Boolean).join('　');
+}
+
+/* セット割（サーバーと同じ計算）。q = { 商品ID: 枚数 } */
+function calcSet(q) {
+  let disc = 0, sets = 0, label = '';
+  (CONFIG.setDeals || []).forEach((d) => {
+    const n = Math.min(...d.items.map((id) => q[id] || 0));
+    if (n > 0) { disc += n * d.discount; sets += n; label = d.label; }
+  });
+  return { disc, sets, label };
+}
+
+function total() {
+  let sub = 0;
+  const q = {};
+  cart.forEach((l) => {
+    const it = itemOf(l.itemId);
+    sub += unitPrice(it, l.size) * l.qty;
+    q[it.id] = (q[it.id] || 0) + l.qty;
+  });
+  const d = calcSet(q);
+  return { sub, disc: d.disc, sets: d.sets, label: d.label, t: sub - d.disc };
+}
+
+function cartLine(l) { return Object.assign({}, l, { unit: unitPrice(itemOf(l.itemId), l.size) }); }
+
+function openSizeChart(it) {
+  const src = (IMG[it.id] || {}).chart;
+  const close = () => modal.remove();
+  const modal = el('div', { class: 'modal', onclick: (e) => { if (e.target === modal) close(); } }, el('div', { class: 'box wide' },
+    el('h3', { text: it.name + ' サイズ表' }),
+    el('div', { class: 'hint', text: '単位はcmです。サイズに迷うときは、運営までお気軽にご相談ください。' }),
+    src ? el('img', { class: 'chart', src, alt: it.name + 'のサイズ表' }) : null,
+    src ? el('a', { class: 'lnk', style: 'display:inline-block;margin-top:8px', href: src, target: '_blank', rel: 'noopener', text: '画像を大きく開く' }) : null,
+    el('button', { class: 'btn', text: '閉じる', onclick: close })
+  ));
+  document.body.append(modal);
+}
+
+function renderSheet() {
+  const list = $('sheetList');
+  list.replaceChildren(...cart.map((l, i) => el('div', { class: 'cartline' },
+    el('div', { text: lineLabel(cartLine(l)) }),
+    el('button', { class: 'x', text: '削除', onclick: () => { cart.splice(i, 1); updateBar(); } })
+  )));
+  if (!cart.length) list.append(el('div', { class: 'empty', text: 'まだ何も入っていません' }));
+}
+
+let sheetOpen = false;
+function setSheet(open) {
+  sheetOpen = open && cart.length > 0;
+  $('sheet').classList.toggle('hidden', !sheetOpen);
+  $('bar').classList.toggle('open', sheetOpen);
+  if (sheetOpen) $('sheet').style.setProperty('--barh', $('bar').offsetHeight + 'px');
+}
+document.addEventListener('click', (e) => { if (e.target.closest('.bar .sum')) setSheet(!sheetOpen); });
+
+function updateBar() {
+  renderSheet();
+  if (!cart.length) setSheet(false);
+  else if (sheetOpen) setSheet(true);
+  $('bar').classList.toggle('hidden', !cart.length || confirming);
+  const n = cart.reduce((a, l) => a + l.qty, 0);
+  $('barCount').textContent = 'カート ' + n + '点';
+  $('barTotal').textContent = yen(total().t);
+}
+
+$('barBtn').onclick = () => { if (isClosedNow()) { showClosed(); show('order'); return; } renderConfirm(); };
+
+const KANA_RE = /^[ァ-ヶー・]+( [ァ-ヶー・]+)+$/;
+
+function renderConfirm() {
+  const v = $('viewOrder');
+  confirming = true;
+  setSheet(false);
+  $('bar').classList.add('hidden');
+  const T = CONFIG.texts || {};
+  const events = CONFIG.events || [];
+  let venue = '';
+  const err = el('div', { class: 'err' });
+  const nameInput = el('input', { type: 'text', placeholder: 'ヤマダ タロウ', value: customerName, maxlength: '30', autocomplete: 'off' });
+  const tt = total();
+
+  const list = el('div', {});
+  list.replaceChildren(...cart.map((l, i) => el('div', { class: 'cartline' },
+    el('div', { text: lineLabel(cartLine(l)) }),
+    el('button', { class: 'x', text: '削除', onclick: () => { cart.splice(i, 1); updateBar(); cart.length ? renderConfirm() : (renderOrder(), show('order')); } })
+  )));
+
+  const sumRows = el('div', { class: 'sumrows' });
+  sumRows.append(el('div', {}, el('span', { text: '小計' }), el('span', { text: yen(tt.sub) })));
+  if (tt.disc > 0) sumRows.append(el('div', { class: 'disc' }, el('span', { text: tt.label + '（' + tt.sets + 'セット）' }), el('span', { text: '-' + yen(tt.disc) })));
+  sumRows.append(el('div', { class: 'grand' }, el('span', { text: '合計' }), el('span', { text: yen(tt.t) })));
+
+  const kids = [
+    el('h2', { text: '注文内容の確認' }),
+    list, sumRows,
+    el('label', {}, 'お名前 ', el('span', { class: 'hint', text: 'カタカナ・フルネーム（姓と名の間にスペース）' })),
+    nameInput
+  ];
+
+  if (events.length) {
+    const chips = el('div', { class: 'chips' });
+    events.forEach((e) => {
+      const chip = el('div', { class: 'chip', text: e });
+      chip.onclick = () => {
+        venue = e;
+        chips.querySelectorAll('.chip').forEach((c) => c.classList.remove('on'));
+        chip.classList.add('on');
+      };
+      chips.append(chip);
+    });
+    kids.push(el('label', {}, 'お渡し会場（種目） ', el('span', { class: 'hint', text: '受け取りに行く練習会場を1つ選んでください' })), chips);
+    if (T.handoff) kids.push(el('div', { class: 'hint', style: 'margin-top:6px', text: T.handoff }));
+  }
+
+  const payCheck = el('input', { type: 'checkbox' });
+  const canCheck = el('input', { type: 'checkbox' });
+  kids.push(
+    el('label', { text: 'お支払いについて' }),
+    el('div', { class: 'policy', text: T.payment || '' }),
+    el('label', { class: 'agree' }, payCheck, el('span', { text: 'お支払いについて同意します' })),
+    el('label', { text: 'キャンセルポリシー' }),
+    el('div', { class: 'policy', text: T.cancel || '' }),
+    el('label', { class: 'agree' }, canCheck, el('span', { text: 'キャンセルポリシーに同意します' })),
+    err
+  );
+  const goBtn = el('button', { class: 'btn', text: '注文内容を最終確認へ' });
+  kids.push(goBtn, el('button', { class: 'btn sub', text: '← 商品選択に戻る', onclick: () => { renderOrder(); show('order'); } }));
+  v.replaceChildren(el('div', { class: 'card' }, el('div', { class: 'body' }, ...kids)));
+  window.scrollTo(0, 0);
+
+  goBtn.onclick = () => {
+    if (isClosedNow()) { showClosed(); show('order'); return; }
+    err.textContent = '';
+    const name = nameInput.value.trim().replace(/[ 　]+/g, ' ');
+    if (!KANA_RE.test(name)) return (err.textContent = 'お名前はカタカナのフルネームで入力してください（姓と名の間にスペース）');
+    if (events.length && !venue) return (err.textContent = 'お渡し会場（種目）を選んでください');
+    if (!payCheck.checked) return (err.textContent = 'お支払いについての同意にチェックしてください');
+    if (!canCheck.checked) return (err.textContent = 'キャンセルポリシーの同意にチェックしてください');
+    customerName = name;
+    openFinal(name, venue, tt);
+  };
+}
+
+function openFinal(name, venue, tt) {
+  const close = () => modal.remove();
+  const msg = el('div', { class: 'err' });
+  const ok = el('button', { class: 'btn', text: '確定する' });
+  const back = el('button', { class: 'btn sub', text: '戻る', onclick: close });
+  const modal = el('div', { class: 'modal' }, el('div', { class: 'box' },
+    el('h3', { text: 'この内容で注文を確定しますか？' }),
+    el('div', { text: 'お名前：' + name }),
+    venue ? el('div', { text: 'お渡し会場：' + venue }) : null,
+    el('div', { text: '合計：' + yen(tt.t) }),
+    el('div', { class: 'hint', style: 'margin-top:8px', text: '確定後のキャンセルは、受付期間内なら「注文書・キャンセル」から行えます。' }),
+    msg,
+    el('div', { class: 'btns' }, back, ok)
+  ));
+  document.body.append(modal);
+  ok.onclick = async () => {
+    if (isClosedNow()) { close(); showClosed(); show('order'); return; }
+    ok.disabled = true; back.disabled = true; ok.textContent = '送信中…'; msg.textContent = '';
+    try {
+      const r = await api({ action: 'order', name, events: venue ? [venue] : [], agreed: true, lines: cart });
+      if (!r.ok) throw new Error(r.error);
+      try { localStorage.setItem('mb_last', JSON.stringify({ id: r.orderId, name })); } catch (e) {}
+      cart = []; updateBar();
+      close();
+      renderDone(r.orderId);
+    } catch (e) {
+      msg.textContent = e.message || '送信に失敗しました。もう一度お試しください。';
+      ok.disabled = false; back.disabled = false; ok.textContent = '確定する';
+    }
+  };
+}
+
+function renderDone(id) {
+  const T = CONFIG.texts || {};
+  $('viewDone').replaceChildren(el('div', { class: 'card' }, el('div', { class: 'body done' },
+    el('div', { text: 'ご注文ありがとうございます！' }),
+    el('div', { class: 'no', text: id }),
+    el('p', { text: 'この注文番号（5桁）とお名前で、「注文書・キャンセル」から注文書を見られます。スクリーンショットで保存しておくと安心です。' }),
+    el('p', { text: T.payment || '' }),
+    T.handoff ? el('p', { text: T.handoff }) : null,
+    el('button', { class: 'btn sub', text: 'もう一度注文する', onclick: () => { renderOrder(); show('order'); } })
+  )));
+  renderCheck(); // 「注文書・キャンセル」に、今の注文番号とお名前を入れておく
+  show('done');
+}
+
+/* ---------- 注文書・キャンセル ---------- */
+function renderCheck() {
+  let last = {};
+  try { last = JSON.parse(localStorage.getItem('mb_last') || '{}'); } catch (e) {}
+  const idIn = el('input', { type: 'text', inputmode: 'numeric', maxlength: '5', placeholder: '12345', value: last.id || '' });
+  const nameIn = el('input', { type: 'text', placeholder: 'ヤマダ タロウ', value: last.name || '' });
+  const err = el('div', { class: 'err' });
+  const out = el('div', {});
+  const btn = el('button', { class: 'btn', text: '注文書を見る' });
+
+  const kv = (k, val) => el('div', {}, el('span', { text: k }), el('span', { text: val }));
+  const sumBlock = (r, hasActive) => {
+    const b = el('div', { class: 'sumrows' });
+    if (hasActive && r.disc > 0) {
+      b.append(kv('小計', yen(r.sub)), el('div', { class: 'disc' }, el('span', { text: r.discLabel + '（' + r.sets + 'セット）' }), el('span', { text: '-' + yen(r.disc) })));
+    }
+    b.append(el('div', { class: 'grand' }, el('span', { text: '合計' }), el('span', { text: hasActive ? yen(r.total) : '—' })));
+    return b;
+  };
+
+  btn.onclick = async () => {
+    err.textContent = ''; out.replaceChildren();
+    const id = idIn.value.normalize('NFKC').trim();
+    const name = nameIn.value.trim().replace(/[ 　]+/g, ' ');
+    if (!/^\d{5}$/.test(id)) return (err.textContent = '注文番号は5桁の数字です');
+    if (!KANA_RE.test(name)) return (err.textContent = 'お名前はカタカナのフルネームで入力してください（姓と名の間にスペース）');
+    btn.disabled = true;
+    try {
+      const r = await api({ action: 'lookup', orderId: id, name });
+      if (!r.ok) throw new Error(r.error);
+      const active = r.lines.filter((l) => l.state !== 'キャンセル');
+      const closedNow = r.closed || isClosedNow();
+      const rows = el('div', { class: 'sumrows' },
+        kv('お名前', r.name),
+        kv('受付日時', r.placedAt),
+        r.venue ? kv('お渡し会場', r.venue) : null,
+        kv('状態', active.length ? '受付済み' : 'キャンセル済み')
+      );
+      const items = r.lines.map((l) => el('div', { class: 'cartline', style: l.state === 'キャンセル' ? 'text-decoration:line-through;color:var(--mute)' : '' },
+        el('div', { text: lineLabel({ itemName: l.item, color: l.color, logo: l.logo, size: l.size, qty: l.qty, unit: l.unit }) })));
+      const T = (CONFIG && CONFIG.texts) || {};
+      const slip = el('div', { class: 'card', style: 'margin-top:14px' }, el('div', { class: 'body' },
+        el('h2', { text: '注文書' }),
+        el('div', { class: 'no', text: '注文番号 ' + r.orderId }),
+        rows,
+        el('label', { text: 'ご注文内容' }),
+        ...items,
+        sumBlock(r, active.length > 0),
+        el('div', { class: 'hint', style: 'margin-top:8px', text: T.payment || '' }),
+        active.length && !closedNow ? el('button', { class: 'btn danger', text: 'この注文をキャンセルする', onclick: async (ev) => {
+          if (!confirm('この注文をすべてキャンセルします。よろしいですか？')) return;
+          ev.target.disabled = true;
+          try {
+            const c = await api({ action: 'cancel', orderId: id, name });
+            if (!c.ok) throw new Error(c.error);
+            out.replaceChildren(el('div', { class: 'notice', style: 'margin-top:14px', text: 'キャンセルしました。' }));
+          } catch (e) { err.textContent = e.message; ev.target.disabled = false; }
+        } }) : (active.length ? el('div', { class: 'hint', style: 'margin-top:10px', text: '受付期間を過ぎたため、変更・キャンセルは運営までご連絡ください。' }) : null)
+      ));
+      out.append(slip);
+    } catch (e) { err.textContent = e.message || '失敗しました'; }
+    btn.disabled = false;
+  };
+
+  $('viewCheck').replaceChildren(el('div', { class: 'card' }, el('div', { class: 'body' },
+    el('h2', { text: '注文書・キャンセル' }),
+    el('div', { class: 'hint', text: '注文番号（5桁）とお名前（カタカナ）で、ご自身の注文書を見られます。' }),
+    el('label', { text: '注文番号（5桁）' }), idIn,
+    el('label', { text: 'お名前（カタカナ・フルネーム）' }), nameIn,
+    err, btn
+  )), out);
+}
+
+init();
+</script>
+</body>
+</html>
