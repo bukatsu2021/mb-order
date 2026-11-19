@@ -1,0 +1,369 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>管理｜MB SPORTS 一斉まとめ注文</title>
+<style>
+  :root{
+    --green:#1b7a3e; --navy:#14213d; --yellow:#ffd200; --red:#e02424; --ink:#1c1f1d; --mute:#6b726d;
+    --bg:#f4f6f3; --card:#fff; --line:#dfe5df; --err:#c0262d; --ok:#e8f4ec;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans","Noto Sans JP",sans-serif;background:var(--bg);color:var(--ink);line-height:1.55;-webkit-text-size-adjust:100%}
+  header{background:linear-gradient(135deg,#000,var(--navy) 60%,#0f4d2a);color:#fff;padding:14px 16px;display:flex;align-items:center;justify-content:space-between;gap:10px;position:sticky;top:0;z-index:10}
+  header h1{margin:0;font-size:16px}
+  header .sub{font-size:11px;opacity:.8}
+  header button{background:var(--yellow);color:var(--navy);border:0;border-radius:99px;padding:8px 14px;font-weight:800;font-size:13px}
+  main{max-width:720px;margin:0 auto;padding:12px 12px 60px}
+  .tabs{display:flex;gap:6px;margin:0 0 12px}
+  .tabs button{flex:1;padding:10px 4px;border:1px solid var(--line);background:#fff;border-radius:10px;font-size:14px;font-weight:700;color:var(--mute)}
+  .tabs button.on{background:var(--green);color:#fff;border-color:var(--green)}
+  .stats{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-bottom:12px}
+  .stat{background:#fff;border:1px solid var(--line);border-radius:12px;padding:8px 12px}
+  .stat small{display:block;color:var(--mute);font-size:11px}
+  .stat b{font-size:18px}
+  .stat.red b{color:var(--red)}
+  input[type=text],input[type=password],select{width:100%;padding:11px 12px;border:1px solid var(--line);border-radius:10px;font-size:16px;background:#fff;color:var(--ink)}
+  .filters{display:flex;flex-direction:column;gap:8px;margin-bottom:12px}
+  .chips{display:flex;flex-wrap:wrap;gap:6px}
+  .chip{padding:7px 12px;border:1.5px solid var(--line);border-radius:99px;font-size:13px;background:#fff;cursor:pointer;user-select:none;font-weight:600}
+  .chip.on{border-color:var(--green);background:var(--ok);color:var(--green)}
+  .card{background:#fff;border:1px solid var(--line);border-radius:14px;padding:12px 14px;margin-bottom:10px}
+  .card.cancel{opacity:.55}
+  .card .top{display:flex;justify-content:space-between;align-items:flex-start;gap:8px}
+  .card .nm{font-size:17px;font-weight:800}
+  .card .meta{font-size:12px;color:var(--mute)}
+  .badge{display:inline-block;font-size:11px;font-weight:700;padding:2px 9px;border-radius:99px;background:#eef1ee;color:var(--mute);margin-left:4px;vertical-align:middle}
+  .badge.venue{background:#e6edf9;color:#1f4aa8}
+  .badge.x{background:#ffe9e9;color:var(--err)}
+  .items{margin:8px 0 4px;font-size:14px}
+  .items div{padding:2px 0}
+  .total{display:flex;justify-content:space-between;font-weight:800;font-size:15px;border-top:1px solid var(--line);margin-top:6px;padding-top:6px}
+  .total.disc{color:var(--red);font-weight:600;font-size:13px;border:0;margin:0;padding:0}
+  .acts{display:flex;gap:8px;margin-top:10px}
+  .tg{flex:1;padding:12px 6px;border-radius:12px;border:2px solid var(--line);background:#fff;font-size:15px;font-weight:800;color:var(--mute)}
+  .tg.on{background:var(--green);border-color:var(--green);color:#fff}
+  .tg:disabled{opacity:.5}
+  .small{background:none;border:0;color:var(--mute);text-decoration:underline;font-size:12px;margin-top:8px;padding:4px 0}
+  .small.danger{color:var(--err)}
+  .vcard h3{margin:0 0 2px;font-size:17px}
+  .vcard .meta{margin-bottom:8px}
+  .brk{font-size:13px;border-top:1px solid var(--line);padding-top:6px;margin-top:6px}
+  .brk .it{font-weight:800;margin-top:6px}
+  .brk .ln{padding:1px 0 1px 8px}
+  .row2{display:flex;align-items:center;gap:8px;font-size:13px;margin:0 0 10px}
+  .row2 input{width:20px;height:20px}
+  .btn{display:block;width:100%;padding:13px;border:0;border-radius:12px;background:var(--green);color:#fff;font-weight:800;font-size:15px;margin-top:8px}
+  .btn.sub{background:#fff;color:var(--green);border:1.5px solid var(--green)}
+  .msg{color:var(--err);font-size:13px;min-height:1.2em;margin:6px 0}
+  .empty{text-align:center;color:var(--mute);padding:36px 10px}
+  .login{max-width:360px;margin:60px auto;text-align:center}
+  .toast{position:fixed;left:50%;bottom:20px;transform:translateX(-50%);background:#1c1f1d;color:#fff;padding:10px 16px;border-radius:99px;font-size:13px;z-index:30}
+  .hidden{display:none}
+</style>
+</head>
+<body>
+<header>
+  <div><h1>MB SPORTS 注文管理</h1><div class="sub" id="upd">読み込み中…</div></div>
+  <button id="reload">更新</button>
+</header>
+<main>
+  <div id="login" class="login hidden">
+    <p>合言葉を入力してください</p>
+    <input type="password" id="pass" autocomplete="current-password">
+    <div class="msg" id="loginMsg"></div>
+    <button class="btn" id="loginBtn">開く</button>
+  </div>
+  <div id="app" class="hidden">
+    <div class="tabs">
+      <button id="tOrders" class="on">注文</button>
+      <button id="tVenues">会場別</button>
+      <button id="tTotal">発注集計</button>
+    </div>
+    <div class="stats" id="stats"></div>
+    <div id="vOrders"></div>
+    <div id="vVenues" class="hidden"></div>
+    <div id="vTotal" class="hidden"></div>
+  </div>
+  <div id="state" class="empty">読み込み中…</div>
+</main>
+<div class="toast hidden" id="toast"></div>
+
+<script>
+/* ★ 注文ページと同じ、GASのウェブアプリURL */
+const GAS_URL = 'https://script.google.com/macros/s/AKfycbwoOYn50xRBq3sPvudGrpChOyeq5qrTau0oev2L-V4o2ceORGt1r6ql01tn2oPe-3zhvg/exec';
+
+const $ = (id) => document.getElementById(id);
+const yen = (n) => '¥' + Number(n).toLocaleString('ja-JP');
+let ROWS = [];
+let VENUES = [];
+let PASS = '';
+try { PASS = sessionStorage.getItem('mb_admin_pass') || ''; } catch (e) {}
+const F = { q: '', status: 'all', venue: '', unhandedOnly: false };
+let tab = 'orders';
+
+function el(tag, attrs, ...kids) {
+  const e = document.createElement(tag);
+  for (const k in (attrs || {})) {
+    if (k === 'class') e.className = attrs[k];
+    else if (k === 'text') e.textContent = attrs[k];
+    else if (k.startsWith('on')) e.addEventListener(k.slice(2), attrs[k]);
+    else e.setAttribute(k, attrs[k]);
+  }
+  kids.flat().forEach((c) => c != null && e.append(c));
+  return e;
+}
+function toast(t) {
+  const x = $('toast'); x.textContent = t; x.classList.remove('hidden');
+  clearTimeout(toast.t); toast.t = setTimeout(() => x.classList.add('hidden'), 2200);
+}
+async function api(body) {
+  const res = await fetch(GAS_URL, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify(Object.assign({ pass: PASS }, body)) });
+  return res.json();
+}
+
+/* ---------- 読み込み ---------- */
+async function load() {
+  if (GAS_URL.indexOf('https://') !== 0) { $('state').textContent = 'GASのURLが未設定です。'; return; }
+  $('upd').textContent = '更新中…';
+  try {
+    const r = await api({ action: 'adminList' });
+    if (!r.ok) {
+      if (/合言葉/.test(r.error)) { showLogin(r.error); return; }
+      throw new Error(r.error);
+    }
+    ROWS = r.rows; VENUES = r.events || [];
+    $('login').classList.add('hidden'); $('state').classList.add('hidden'); $('app').classList.remove('hidden');
+    const d = new Date();
+    $('upd').textContent = '最終更新 ' + String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0');
+    render();
+  } catch (e) {
+    $('state').classList.remove('hidden');
+    $('state').textContent = '読み込みに失敗しました。通信状況を確認して「更新」を押してください。';
+    $('upd').textContent = '失敗';
+  }
+}
+function showLogin(msg) {
+  $('state').classList.add('hidden'); $('app').classList.add('hidden'); $('login').classList.remove('hidden');
+  $('loginMsg').textContent = PASS ? msg : '';
+}
+$('loginBtn').onclick = () => { PASS = $('pass').value; try { sessionStorage.setItem('mb_admin_pass', PASS); } catch (e) {} load(); };
+$('reload').onclick = load;
+
+/* ---------- 注文ごとにまとめる ---------- */
+function groupOrders() {
+  const m = new Map();
+  ROWS.forEach((r) => {
+    if (!m.has(r.orderId)) m.set(r.orderId, { id: r.orderId, name: r.name, venue: r.venue, placedAt: r.placedAt, rows: [] });
+    m.get(r.orderId).rows.push(r);
+  });
+  return [...m.values()].map((o) => {
+    const act = o.rows.filter((r) => r.state !== 'キャンセル');
+    o.canceled = act.length === 0;
+    o.sub = act.reduce((a, r) => a + r.sub, 0);
+    o.disc = act.reduce((a, r) => a + r.disc, 0);
+    o.total = o.sub - o.disc;
+    o.pieces = act.reduce((a, r) => a + r.qty, 0);
+    o.paid = act.length > 0 && act.every((r) => r.paid);
+    o.handed = act.length > 0 && act.every((r) => r.handed);
+    return o;
+  }).sort((a, b) => (a.placedAt < b.placedAt ? 1 : -1));
+}
+const label = (r) => [r.item, r.color, r.logo && r.logo.replace(/（.*）/, ''), 'サイズ ' + r.size, '×' + r.qty].filter(Boolean).join('　');
+
+/* ---------- 上の数字 ---------- */
+function renderStats(orders) {
+  const live = orders.filter((o) => !o.canceled);
+  const sum = live.reduce((a, o) => a + o.total, 0);
+  const got = live.filter((o) => o.paid).reduce((a, o) => a + o.total, 0);
+  const pcs = live.reduce((a, o) => a + o.pieces, 0);
+  $('stats').replaceChildren(
+    el('div', { class: 'stat' }, el('small', { text: '注文' }), el('b', { text: live.length + '件 / ' + pcs + '点' })),
+    el('div', { class: 'stat' }, el('small', { text: '請求の合計' }), el('b', { text: yen(sum) })),
+    el('div', { class: 'stat' }, el('small', { text: '入金済' }), el('b', { text: yen(got) })),
+    el('div', { class: 'stat red' }, el('small', { text: '未回収' }), el('b', { text: yen(sum - got) }))
+  );
+}
+
+/* ---------- 注文タブ ---------- */
+function matches(o) {
+  if (F.venue && o.venue !== F.venue) return false;
+  if (F.status === 'cancel') { if (!o.canceled) return false; }
+  else {
+    if (o.canceled) return false;
+    if (F.status === 'unpaid' && o.paid) return false;
+    if (F.status === 'unhanded' && o.handed) return false;
+    if (F.status === 'done' && !(o.paid && o.handed)) return false;
+  }
+  if (F.q) {
+    const q = F.q.normalize('NFKC').replace(/\s+/g, '').toLowerCase();
+    if (!(o.name.normalize('NFKC').replace(/\s+/g, '').toLowerCase().includes(q) || o.id.includes(q))) return false;
+  }
+  return true;
+}
+
+function renderOrders(orders) {
+  const v = $('vOrders');
+  const q = el('input', { type: 'text', placeholder: '名前（カタカナ）か注文番号で検索', value: F.q });
+  q.oninput = () => { F.q = q.value; renderList(); };
+  const stChips = el('div', { class: 'chips' }, ...[['all', 'すべて'], ['unpaid', '未入金'], ['unhanded', '未渡し'], ['done', '完了'], ['cancel', 'キャンセル']].map(([k, t]) => {
+    const c = el('div', { class: 'chip' + (F.status === k ? ' on' : ''), text: t });
+    c.onclick = () => { F.status = k; renderOrders(orders); };
+    return c;
+  }));
+  const vChips = VENUES.length ? el('div', { class: 'chips' }, ...[['', '全会場'], ...VENUES.map((x) => [x, x])].map(([k, t]) => {
+    const c = el('div', { class: 'chip' + (F.venue === k ? ' on' : ''), text: t });
+    c.onclick = () => { F.venue = k; renderOrders(orders); };
+    return c;
+  })) : null;
+  const list = el('div', {});
+  v.replaceChildren(el('div', { class: 'filters' }, q, stChips, vChips), list);
+
+  function renderList() {
+    const shown = orders.filter(matches);
+    list.replaceChildren(...(shown.length ? shown.map(orderCard) : [el('div', { class: 'empty', text: '該当する注文はありません' })]));
+  }
+  renderList();
+}
+
+function orderCard(o) {
+  const card = el('div', { class: 'card' + (o.canceled ? ' cancel' : '') });
+  card.append(el('div', { class: 'top' },
+    el('div', {}, el('div', { class: 'nm' }, o.name, o.venue ? el('span', { class: 'badge venue', text: o.venue }) : null, o.canceled ? el('span', { class: 'badge x', text: 'キャンセル' }) : null),
+      el('div', { class: 'meta', text: '注文番号 ' + o.id + '　' + o.placedAt }))
+  ));
+  card.append(el('div', { class: 'items' }, ...o.rows.map((r) => el('div', { style: r.state === 'キャンセル' ? 'text-decoration:line-through;color:#999' : '', text: label(r) }))));
+  if (!o.canceled) {
+    if (o.disc > 0) card.append(el('div', { class: 'total disc' }, el('span', { text: '上下セット割' }), el('span', { text: '-' + yen(o.disc) })));
+    card.append(el('div', { class: 'total' }, el('span', { text: '請求額' }), el('span', { text: yen(o.total) })));
+    const paid = el('button', { class: 'tg' + (o.paid ? ' on' : ''), text: o.paid ? '✓ 入金済' : '入金済にする' });
+    const handed = el('button', { class: 'tg' + (o.handed ? ' on' : ''), text: o.handed ? '✓ 渡し済' : '渡し済にする' });
+    paid.onclick = () => toggle(o, 'paid', !o.paid, paid);
+    handed.onclick = () => toggle(o, 'handed', !o.handed, handed);
+    card.append(el('div', { class: 'acts' }, paid, handed));
+    card.append(el('button', { class: 'small danger', text: 'この注文をキャンセル扱いにする', onclick: () => setState(o, 'キャンセル') }));
+  } else {
+    card.append(el('button', { class: 'small', text: 'キャンセルを取り消す（受付に戻す）', onclick: () => setState(o, '受付') }));
+  }
+  return card;
+}
+
+async function toggle(o, field, value, btn) {
+  btn.disabled = true;
+  try {
+    const r = await api({ action: 'adminUpdate', type: 'order', orderId: o.id, field, value });
+    if (!r.ok) throw new Error(r.error);
+    ROWS.forEach((x) => { if (x.orderId === o.id && x.state !== 'キャンセル') x[field] = value; });
+    render();
+    toast(o.name + '：' + (field === 'paid' ? '入金' : '渡し') + (value ? '済にしました' : 'を取り消しました'));
+  } catch (e) { toast('失敗：' + (e.message || '通信エラー')); btn.disabled = false; }
+}
+async function setState(o, value) {
+  if (!confirm(o.name + ' さんの注文を「' + value + '」にします。よろしいですか？')) return;
+  try {
+    const r = await api({ action: 'adminUpdate', type: 'state', orderId: o.id, value });
+    if (!r.ok) throw new Error(r.error);
+    ROWS.forEach((x) => { if (x.orderId === o.id) x.state = value; });
+    render();
+    toast('「' + value + '」にしました');
+  } catch (e) { toast('失敗：' + (e.message || '通信エラー')); }
+}
+
+/* ---------- 集計（商品 → 色・ロゴ → サイズ） ---------- */
+const SIZE_ORDER = ['100', '110', '120', '130', '140', '150', 'S', 'M', 'L', 'LL', 'XL', 'XXL', '3L', '4L', '5L'];
+function breakdown(rows) {
+  const items = new Map();
+  rows.forEach((r) => {
+    if (!items.has(r.item)) items.set(r.item, new Map());
+    const key = [r.color, r.logo && r.logo.replace(/（.*）/, '')].filter(Boolean).join('・') || '—';
+    const g = items.get(r.item);
+    if (!g.has(key)) g.set(key, new Map());
+    const s = g.get(key);
+    s.set(r.size, (s.get(r.size) || 0) + r.qty);
+  });
+  return items;
+}
+function breakdownText(items) {
+  const out = [];
+  items.forEach((g, item) => {
+    let n = 0; g.forEach((s) => s.forEach((q) => (n += q)));
+    out.push('■' + item + '（' + n + '点）');
+    g.forEach((s, key) => {
+      const sizes = [...s.entries()].sort((a, b) => SIZE_ORDER.indexOf(a[0]) - SIZE_ORDER.indexOf(b[0]));
+      out.push('  ' + key + '：' + sizes.map(([z, q]) => z + '×' + q).join('　') + '（計' + sizes.reduce((a, x) => a + x[1], 0) + '）');
+    });
+  });
+  return out.join('\n');
+}
+function breakdownNode(items) {
+  const box = el('div', { class: 'brk' });
+  if (!items.size) { box.append(el('div', { class: 'empty', text: 'データがありません' })); return box; }
+  items.forEach((g, item) => {
+    let n = 0; g.forEach((s) => s.forEach((q) => (n += q)));
+    box.append(el('div', { class: 'it', text: item + '（' + n + '点）' }));
+    g.forEach((s, key) => {
+      const sizes = [...s.entries()].sort((a, b) => SIZE_ORDER.indexOf(a[0]) - SIZE_ORDER.indexOf(b[0]));
+      box.append(el('div', { class: 'ln', text: key + '：' + sizes.map(([z, q]) => z + '×' + q).join('　') + '（計' + sizes.reduce((a, x) => a + x[1], 0) + '）' }));
+    });
+  });
+  return box;
+}
+
+/* ---------- 会場別タブ ---------- */
+function renderVenues(orders) {
+  const v = $('vVenues');
+  const chk = el('input', { type: 'checkbox' });
+  chk.checked = F.unhandedOnly;
+  chk.onchange = () => { F.unhandedOnly = chk.checked; renderVenues(orders); };
+  const names = [...new Set([...VENUES, ...orders.map((o) => o.venue)])];
+  const cards = names.map((name) => {
+    const live = orders.filter((o) => !o.canceled && o.venue === name);
+    const target = F.unhandedOnly ? live.filter((o) => !o.handed) : live;
+    const unpaid = live.filter((o) => !o.paid).reduce((a, o) => a + o.total, 0);
+    const rows = [].concat(...target.map((o) => o.rows.filter((r) => r.state !== 'キャンセル')));
+    return el('div', { class: 'card vcard' },
+      el('h3', { text: name || '（会場未選択）' }),
+      el('div', { class: 'meta', text: live.length + '件　未渡し ' + live.filter((o) => !o.handed).length + '件　未回収 ' + yen(unpaid) }),
+      breakdownNode(breakdown(rows)));
+  });
+  v.replaceChildren(
+    el('label', { class: 'row2' }, chk, '未渡しの分だけ集計する（お渡し当日の準備用）'),
+    ...(cards.length ? cards : [el('div', { class: 'empty', text: 'まだ注文がありません' })]));
+}
+
+/* ---------- 発注集計タブ ---------- */
+function renderTotal(orders) {
+  const live = [].concat(...orders.filter((o) => !o.canceled).map((o) => o.rows.filter((r) => r.state !== 'キャンセル')));
+  const items = breakdown(live);
+  const text = breakdownText(items);
+  const copy = el('button', { class: 'btn sub', text: 'メーカー発注用にコピー', onclick: async () => {
+    try { await navigator.clipboard.writeText(text); toast('コピーしました'); }
+    catch (e) { const t = el('textarea', {}); t.value = text; document.body.append(t); t.select(); document.execCommand('copy'); t.remove(); toast('コピーしました'); }
+  } });
+  $('vTotal').replaceChildren(el('div', { class: 'card' }, el('div', { class: 'meta', text: 'キャンセルを除いた、全会場の合計です' }), breakdownNode(items), copy));
+}
+
+/* ---------- 全体 ---------- */
+function render() {
+  const orders = groupOrders();
+  renderStats(orders);
+  renderOrders(orders);
+  renderVenues(orders);
+  renderTotal(orders);
+  ['orders', 'venues', 'total'].forEach((t) => {
+    $('v' + t[0].toUpperCase() + t.slice(1)).classList.toggle('hidden', tab !== t);
+  });
+  $('tOrders').classList.toggle('on', tab === 'orders');
+  $('tVenues').classList.toggle('on', tab === 'venues');
+  $('tTotal').classList.toggle('on', tab === 'total');
+}
+$('tOrders').onclick = () => { tab = 'orders'; render(); };
+$('tVenues').onclick = () => { tab = 'venues'; render(); };
+$('tTotal').onclick = () => { tab = 'total'; render(); };
+
+load();
+</script>
+</body>
+</html>
